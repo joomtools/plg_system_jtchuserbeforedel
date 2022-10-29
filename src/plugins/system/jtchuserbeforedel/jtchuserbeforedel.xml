@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.10" type="plugin" group="system" method="upgrade">
+	<name>plg_system_jtchuserbeforedel</name>
+	<author>Guido De Gobbis</author>
+	<creationDate>##DATE##</creationDate>
+	<copyright>(C) JoomTools. All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later; see LICENSE.txt</license>
+	<authorEmail>support@joomtools.de</authorEmail>
+	<authorUrl>https://github.com/joomtools/plg_system_jtchuserbeforedel</authorUrl>
+	<version>##VERSION##</version>
+	<description>PLG_SYSTEM_JTCHUSERBEFOREDEL_XML_DESC</description>
+	<files>
+		##FILES##
+	</files>
+	<scriptfile>script.php</scriptfile>
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+				<field name="fallbackUser"
+				       type="user"
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_FALLBACK_USER_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_FALLBACK_USER_DESC"
+				       default="CURRENT"
+				/>
+				<field name="setAlias"
+				       type="radio"
+				       class="btn-group btn-group-yesno"
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_SET_ALIAS_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_SET_ALIAS_DESC"
+				       default="0"
+				>
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+				<field name="overrideAlias"
+				       type="radio"
+				       class="btn-group btn-group-yesno"
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_OVERFRIDE_ALIAS_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_OVERFRIDE_ALIAS_DESC"
+				       default="0"
+				       showon="setAlias:1"
+				>
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+				<field name="fallbackAliasName"
+				       type="text"
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_FALLBACK_ALIAS_NAME_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_FALLBACK_ALIAS_NAME_DESC"
+				       default=""
+				       showon="setAlias:1"
+				/>
+			</fieldset>
+		</fields>
+	</config>
+	<updateservers>
+		<server type="extension" priority="1" name="PLG_SYSTEM_JTCHUSERBEFOREDEL">
+			https://raw.githubusercontent.com/joomtools/plg_system_jtchuserbeforedel/main/update.xml
+		</server>
+	</updateservers>
+</extension>
