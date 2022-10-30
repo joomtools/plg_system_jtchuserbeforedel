@@ -13,16 +13,13 @@ defined('_JEXEC') or die;
 \JLoader::registerNamespace('JtChUserBeforeDel', JPATH_PLUGINS . '/system/jtchuserbeforedel/src', false, true, 'psr4');
 
 use Joomla\CMS\Application\CMSApplication;
-use Joomla\CMS\Date\Date;
-use Joomla\CMS\Document\Document;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
-use Joomla\CMS\Form\Form;
+use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
-use Joomla\CMS\User\UserHelper;
 use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 
 /**
@@ -161,14 +158,33 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                 }
 
                 if (!$userExists) {
+                    $this->app->enqueueMessage(
+                        Text::sprintf(
+                            'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_CHANGED_MSG',
+                            $item->$authorTable,
+                            $fallbackUserId
+                        ),
+                        'info'
+                    );
+
                     $item->$authorTable = $fallbackUserId;
 
                     if ($aliasTable && isset($item->$aliasTable) && $this->params->get('setAlias')) {
-                        if (!$this->params->get('overrideAlias') && !empty($item->$aliasTable)) {
+                        if ((!$this->params->get('overrideAlias') && !empty($item->$aliasTable))
+                            || (empty($item->$aliasTable) && empty($fallbackAliasName))
+                        ) {
                             continue;
                         }
 
                         $item->$aliasTable = $fallbackAliasName;
+
+                        $this->app->enqueueMessage(
+                            Text::sprintf(
+                                'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_CHANGED_FALLBACK_ALIAS_MSG',
+                                $fallbackAliasName
+                            ),
+                            'info'
+                        );
                     }
                 }
             }
@@ -315,6 +331,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
         }
 
         if ($error) {
+            // TODO: Change Message to Languagefile.
             $this->app->enqueueMessage(
                 sprintf("The class '%s' to call for handle the download could not be found.", $extensionNs),
                 'error'
