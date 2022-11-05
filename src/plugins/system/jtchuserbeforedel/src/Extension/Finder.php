@@ -47,7 +47,6 @@ class Finder implements JtChUserBeforeDelInterface
                 'tableName' => '#__finder_filters',
                 'author'    => 'created_by',
                 'editor'    => 'modified_by',
-                'date'      => 'modified',
             ),
         );
     }

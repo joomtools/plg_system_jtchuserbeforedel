@@ -47,7 +47,6 @@ class Categories implements JtChUserBeforeDelInterface
                 'tableName' => '#__categories',
                 'author'    => 'created_user_id',
                 'editor'    => 'modified_user_id',
-                'date'      => 'modified_time',
             ),
         );
     }

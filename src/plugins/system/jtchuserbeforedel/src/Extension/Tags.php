@@ -48,7 +48,6 @@ class Tags implements JtChUserBeforeDelInterface
                 'author'    => 'created_user_id',
                 'alias'     => 'created_by_alias',
                 'editor'    => 'modified_user_id',
-                'date'      => 'modified_time',
             ),
         );
     }

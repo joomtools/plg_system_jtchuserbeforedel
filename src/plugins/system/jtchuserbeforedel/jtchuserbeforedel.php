@@ -73,7 +73,14 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      */
     public function onContentBeforeSave($context, $item)
     {
-        $this->changeUserIdIfUserDoesNotExistAnymore($context, $item);
+        // TODO: Check if needed, as 'onContentPrepareData' clears all on load!
+        list($extensionName, $rest) = explode('.', $context, 2);
+
+        $extension = $this->getExtension($extensionName);
+
+        if ($extension instanceof JtChUserBeforeDelInterface) {
+            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
+        }
 
         return;
     }
@@ -90,8 +97,12 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      */
     public function onContentPrepareData($context, $item)
     {
-        if ($context != 'com_plugins.plugin') {
-            $this->changeUserIdIfUserDoesNotExistAnymore($context, $item);
+        list($extensionName, $rest) = explode('.', $context, 2);
+
+        $extension = $this->getExtension($extensionName);
+
+        if ($extension instanceof JtChUserBeforeDelInterface) {
+            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
         }
 
         return;
@@ -109,12 +120,12 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      */
     public function onExtensionBeforeSave($context, $item)
     {
-        if ($context != 'com_plugins.plugin') {
-            $this->changeUserIdIfUserDoesNotExistAnymore($context, $item);
-        }
+        list($extensionName, $rest) = explode('.', $context, 2);
 
-        if ($this->_name == $item->element) {
-            // $this->app->enqueueMessage('Hier die Felder bereinigen...', 'warning');
+        $extension = $this->getExtension($extensionName);
+
+        if ($extension instanceof JtChUserBeforeDelInterface) {
+            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
         }
 
         return;
@@ -123,15 +134,16 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     /**
      * Description
      *
-     * @param   string  $context
+     * @param   object  $extension
      * @param   object  $item
      *
      * @return  void
      *
      * @since   __BUMP_VERSION__
      */
-    private function changeUserIdIfUserDoesNotExistAnymore($context, $item)
+    private function changeUserIdIfUserDoesNotExistAnymore($extension, $item)
     {
+        $this->_subject->setError(new RuntimeException('Testmessage'));
         $fallbackUserId    = $this->params->get('fallbackUser', null);
         $fallbackAliasName = $this->params->get('fallbackAliasName', '');
 
@@ -139,28 +151,22 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $fallbackUserId = Factory::getUser()->id;
         }
 
-        list($ext, $rest) = explode('.', $context, 2);
-
-        if (empty($extension = $this->getExtension($ext))) {
-            return;
-        }
-
         $userTable = Table::getInstance('user');
 
         foreach ($extension->getColumsToChange() as $table) {
             if (is_array($table) && count($table) > 1) {
-                $userExists  = true;
-                $authorTable = $table['author'] ?? false;
-                $aliasTable  = $table['alias'] ?? false;
+                $authorExists = true;
+                $authorTable  = $table['author'] ?? false;
+                $aliasTable   = $table['alias'] ?? false;
 
                 if ($authorTable && isset($item->$authorTable)) {
-                    $userExists = $userTable->load($item->$authorTable) === true;
+                    $authorExists = $userTable->load($item->$authorTable) === true;
                 }
 
-                if (!$userExists) {
+                if (!$authorExists) {
                     $this->app->enqueueMessage(
                         Text::sprintf(
-                            'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_CHANGED_MSG',
+                            'PLG_SYSTEM_JTCHUSERBEFOREDEL_AUTHOR_CHANGED_MSG',
                             $item->$authorTable,
                             $fallbackUserId
                         ),
@@ -206,7 +212,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
         if ($user['id'] == $fallbackUser) {
             $this->app->enqueueMessage(
-                'Der Benutzer wurde als Fallback eingestellt und kann deshalb nicht gelöscht werden,<br> bitte vorher ändern!',
+                'Der Benutzer wurde als Fallback eingestellt und kann deshalb nicht gelöscht werden,<br /> bitte vorher ändern!',
                 'error'
             );
 
@@ -214,11 +220,15 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $this->app->redirect($url, 500);
         }
 
-        $this->changeUser($user);
+        if (!$this->changeUser($user)) {
+            $this->app->enqueueMessage(
+                'Der Benutzer wurde nicht gelöscht!',
+                'error'
+            );
 
-        throw new \Exception('Nicht löschen!');
-
-        return;
+            $url = Uri::getInstance()->toString(array('path', 'query', 'fragment'));
+            $this->app->redirect($url, 500);
+        }
     }
 
     /**
@@ -232,16 +242,18 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      */
     private function changeUser($user)
     {
+        $return         = true;
         $userId         = $user['id'];
-        $AliasName      = $user['name'];
+        $aliasName      = $user['name'];
         $fallbackUserId = $this->params->get('fallbackUser');
         $setAuthorAlias = $this->params->get('setAlias');
 
         if (empty($extensions = $this->getExtension())) {
-            return;
+            // TODO: Add error handling and/or message and return false
+            return true;
         }
 
-        foreach ($extensions as $extensionName => $extensionClass) {
+        foreach ($extensions as $extensionClass) {
             /** @var JtChUserBeforeDelInterface $extensionClass */
             $columsToChangeUserId = $extensionClass->getColumsToChange();
 
@@ -253,17 +265,17 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                 if ($tableName && $authorColumn) {
                     $query = $this->db->getQuery(true);
 
-                    $query->update($tableName)
+                    $query->update($tableName . '_')
                         ->set($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $fallbackUserId));
 
                     if ($setAuthorAlias && $aliasColumn) {
                         if ($this->params->get('overrideAlias')) {
-                            $query->set($this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($AliasName));
+                            $query->set($this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($aliasName));
                         } else {
                             $query->set(
                                 $this->db->quoteName($aliasColumn)
                                 . ' = COALESCE(NULLIF('
-                                . $this->db->quote($AliasName)
+                                . $this->db->quote($aliasName)
                                 . ', ""), '
                                 . $this->db->quoteName($aliasColumn) . ')'
                             );
@@ -275,9 +287,20 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
                 $test = (string) $query;
 
-                $result = $this->db->setQuery($query)->execute();
+                try {
+                    $this->db->setQuery($query)->execute();
+                } catch (RuntimeException $e) {
+                    $this->app->enqueueMessage(
+                        $e->getMessage(),
+                        'error'
+                    );
+
+                    $return = false;
+                }
             }
         }
+
+        return $return;
     }
 
     /**

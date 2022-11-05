@@ -20,7 +20,7 @@ defined('_JEXEC') or die;
 interface JtChUserBeforeDelInterface
 {
     /**
-     * Description.
+     * Get the extension name like the first part of the context.
      *
      * @return  string
      *
@@ -29,7 +29,16 @@ interface JtChUserBeforeDelInterface
     public function getExtensionName();
 
     /**
-     * Description.
+     * Get the database table and columns about the user information to change.
+     *
+     * Expected array keys, if there is a table and column to change:
+     * Example:
+     * array(
+     *      'tableName' => '#__content',
+     *      'author'    => 'created_by',
+     *      'alias'     => 'created_by_alias',
+     *      'editor'    => 'modified_by',
+     * )
      *
      * @return  array
      *

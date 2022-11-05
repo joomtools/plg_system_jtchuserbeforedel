@@ -47,13 +47,11 @@ class Fields implements JtChUserBeforeDelInterface
                 'tableName' => '#__fields',
                 'author'    => 'created_user_id',
                 'editor'    => 'modified_by',
-                'date'      => 'modified_time',
             ),
             array(
                 'tableName' => '#__fields_groups',
                 'author'    => 'created_by',
                 'editor'    => 'modified_by',
-                'date'      => 'modified',
             ),
         );
     }
