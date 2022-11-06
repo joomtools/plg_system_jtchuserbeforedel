@@ -45,9 +45,9 @@ class Tags implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__tags',
+                'uniqueId'  => 'id',
                 'author'    => 'created_user_id',
                 'alias'     => 'created_by_alias',
-                'editor'    => 'modified_user_id',
             ),
         );
     }

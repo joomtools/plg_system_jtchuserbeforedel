@@ -50,6 +50,26 @@
 				       default=""
 				       showon="setAlias:1"
 				/>
+				<field name="batchNote"
+				       type="note"
+				       class="alert alert-warning"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_BATCH_NOTE_DESC"
+				/>
+				<field name="userIdToChangeManualy"
+				       type="text"
+				       class="validate-numeric"
+				       maxlength="5"
+				       default=""
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_ID_TO_CHANGE_MANUALY_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_ID_TO_CHANGE_MANUALY_DESC"
+				       filter="INT"
+				/>
+				<field name="userNameToChangeManualy"
+				       type="text"
+				       default=""
+				       label="PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_NAME_TO_CHANGE_MANUALY_LABEL"
+				       description="PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_NAME_TO_CHANGE_MANUALY_DESC"
+				/>
 			</fieldset>
 		</fields>
 	</config>

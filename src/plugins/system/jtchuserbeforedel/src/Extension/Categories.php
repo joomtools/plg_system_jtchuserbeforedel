@@ -45,8 +45,8 @@ class Categories implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__categories',
+                'uniqueId'  => 'id',
                 'author'    => 'created_user_id',
-                'editor'    => 'modified_user_id',
             ),
         );
     }

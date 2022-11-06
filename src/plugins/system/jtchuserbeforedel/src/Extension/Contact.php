@@ -45,13 +45,14 @@ class Contact implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__contact_details',
+                'uniqueId'  => 'id',
                 'author'    => 'created_by',
                 'alias'     => 'created_by_alias',
-                'editor'    => 'modified_by',
             ),
             array(
                 '#tableName' => '#__contact_details',
-                'author'            => 'user_id',
+                'uniqueId'   => 'id',
+                'author'     => 'user_id',
             ),
         );
     }

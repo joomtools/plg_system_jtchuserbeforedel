@@ -45,9 +45,9 @@ class Newsfeeds implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__newsfeeds',
+                'uniqueId'  => 'id',
                 'author'    => 'created_by',
                 'alias'     => 'created_by_alias',
-                'editor'    => 'modified_by',
             ),
         );
     }

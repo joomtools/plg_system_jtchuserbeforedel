@@ -45,8 +45,8 @@ class Finder implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__finder_filters',
+                'uniqueId'  => 'filter_id',
                 'author'    => 'created_by',
-                'editor'    => 'modified_by',
             ),
         );
     }

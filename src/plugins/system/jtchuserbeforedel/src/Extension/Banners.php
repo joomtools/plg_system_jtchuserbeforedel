@@ -45,9 +45,9 @@ class Banners implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__banners',
+                'uniqueId'  => 'id',
                 'author'    => 'created_by',
                 'alias'     => 'created_by_alias',
-                'editor'    => 'modified_by',
             ),
         );
     }

@@ -45,13 +45,13 @@ class Fields implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__fields',
+                'uniqueId'  => 'id',
                 'author'    => 'created_user_id',
-                'editor'    => 'modified_by',
             ),
             array(
                 'tableName' => '#__fields_groups',
+                'uniqueId'  => 'id',
                 'author'    => 'created_by',
-                'editor'    => 'modified_by',
             ),
         );
     }

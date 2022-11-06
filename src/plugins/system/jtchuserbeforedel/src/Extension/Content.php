@@ -45,9 +45,9 @@ class Content implements JtChUserBeforeDelInterface
         return array(
             array(
                 'tableName' => '#__content',
+                'uniqueId'  => 'id',
                 'author'    => 'created_by',
                 'alias'     => 'created_by_alias',
-                'editor'    => 'modified_by',
             ),
         );
     }

@@ -20,6 +20,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Registry\Registry;
 use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 
 /**
@@ -81,8 +82,6 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
         if ($extension instanceof JtChUserBeforeDelInterface) {
             $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
         }
-
-        return;
     }
 
     /**
@@ -104,8 +103,6 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
         if ($extension instanceof JtChUserBeforeDelInterface) {
             $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
         }
-
-        return;
     }
 
     /**
@@ -128,7 +125,43 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
         }
 
-        return;
+        if ($context == 'com_plugins.plugin' && $item->name == 'plg_system_jtchuserbeforedel') {
+            $newParams               = new Registry($item->params);
+            $userIdToChangeManualy   = $newParams->get('userIdToChangeManualy', '');
+            $userNameToChangeManualy = $newParams->get('userNameToChangeManualy', '');
+
+            // Reset the fields
+            $newParams->set('userIdToChangeManualy', '');
+            $newParams->set('userNameToChangeManualy', '');
+
+            $item->params = (string) $newParams;
+
+            if (empty($userIdToChangeManualy)) {
+                return;
+            }
+
+            if ($this->isUserExists($userIdToChangeManualy)) {
+                $this->app->enqueueMessage(
+                    Text::sprintf(
+                        'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_ID_TO_CHANGE_MANUALY_EXISTS',
+                        $userIdToChangeManualy
+                    ),
+                    'info'
+                );
+
+                return;
+            }
+
+            if (!empty($userIdToChangeManualy)) {
+                $this->params = $newParams;
+                $user         = array(
+                    'id'   => $userIdToChangeManualy,
+                    'name' => $userNameToChangeManualy,
+                );
+
+                $this->changeUser($user);
+            }
+        }
     }
 
     /**
@@ -144,14 +177,12 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     private function changeUserIdIfUserDoesNotExistAnymore($extension, $item)
     {
         $this->_subject->setError(new RuntimeException('Testmessage'));
-        $fallbackUserId    = $this->params->get('fallbackUser', null);
+        $fallbackUserId    = $this->params->get('fallbackUser');
         $fallbackAliasName = $this->params->get('fallbackAliasName', '');
 
         if (empty($fallbackUserId) || !is_numeric($fallbackUserId)) {
             $fallbackUserId = Factory::getUser()->id;
         }
-
-        $userTable = Table::getInstance('user');
 
         foreach ($extension->getColumsToChange() as $table) {
             if (is_array($table) && count($table) > 1) {
@@ -160,7 +191,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                 $aliasTable   = $table['alias'] ?? false;
 
                 if ($authorTable && isset($item->$authorTable)) {
-                    $authorExists = $userTable->load($item->$authorTable) === true;
+                    $authorExists = $this->isUserExists($item->$authorTable);
                 }
 
                 if (!$authorExists) {
@@ -195,6 +226,22 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                 }
             }
         }
+    }
+
+    /**
+     * Description
+     *
+     * @param   int  $userId
+     *
+     * @return  bool
+     *
+     * @since   __BUMP_VERSION__
+     */
+    private function isUserExists($userId)
+    {
+        $userTable = Table::getInstance('user');
+
+        return $userTable->load((int) $userId) === true;
     }
 
     /**
@@ -248,31 +295,43 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
         $fallbackUserId = $this->params->get('fallbackUser');
         $setAuthorAlias = $this->params->get('setAlias');
 
+        if (empty($fallbackUserId) || !is_numeric($fallbackUserId)) {
+            $fallbackUserId = Factory::getUser()->id;
+        }
+
         if (empty($extensions = $this->getExtension())) {
             // TODO: Add error handling and/or message and return false
             return true;
         }
 
-        foreach ($extensions as $extensionClass) {
+        foreach ($extensions as $extensionName => $extensionClass) {
             /** @var JtChUserBeforeDelInterface $extensionClass */
             $columsToChangeUserId = $extensionClass->getColumsToChange();
 
             foreach ($columsToChangeUserId as $table) {
                 $tableName    = $table['tableName'] ?? false;
+                $uniqueId     = $table['uniqueId'] ?? false;
                 $authorColumn = $table['author'] ?? false;
                 $aliasColumn  = $table['alias'] ?? false;
 
                 if ($tableName && $authorColumn) {
-                    $query = $this->db->getQuery(true);
+                    $selectQuery = $this->db->getQuery(true);
 
-                    $query->update($tableName . '_')
+                    $selectQuery->select($this->db->quoteName($uniqueId))
+                        ->from($tableName)
+                        ->where($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId))
+                        ->set('FOR UPDATE');
+
+                    $updateQuery = $this->db->getQuery(true);
+
+                    $updateQuery->update($this->db->quoteName($tableName))
                         ->set($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $fallbackUserId));
 
                     if ($setAuthorAlias && $aliasColumn) {
                         if ($this->params->get('overrideAlias')) {
-                            $query->set($this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($aliasName));
+                            $updateQuery->set($this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($aliasName));
                         } else {
-                            $query->set(
+                            $updateQuery->set(
                                 $this->db->quoteName($aliasColumn)
                                 . ' = COALESCE(NULLIF('
                                 . $this->db->quote($aliasName)
@@ -282,13 +341,37 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                         }
                     }
 
-                    $query->where($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId));
+                    $updateQuery->where($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId));
                 }
 
-                $test = (string) $query;
+                $test = (string) $updateQuery;
 
                 try {
-                    $this->db->setQuery($query)->execute();
+                    $infoAuthorAlias = '';
+                    $selectResult    = $this->db->setQuery($selectQuery)->loadColumn();
+
+                    if (!empty($selectResult)) {
+                        $elementList = implode(', ', $selectResult);
+
+                        if ($setAuthorAlias && $aliasColumn) {
+                            $infoAuthorAlias = sprintf('Es wurde jeweils der Autoralias "%s" eingetragen.', $aliasName);
+                        }
+
+                        Factory::getLanguage()->load($extensionName);
+
+                        $this->db->setQuery($updateQuery)->execute();
+                        $this->app->enqueueMessage(
+                            Text::sprintf(
+                                '%s: bei den Elementen mit der ID "%s" wurde die alte Benutzer ID "%d" mit der ID "%d" ausgetauscht. %s',
+                                Text::_($extensionName),
+                                $elementList,
+                                (int) $userId,
+                                (int) $fallbackUserId,
+                                $infoAuthorAlias
+                            ),
+                            'info'
+                        );
+                    }
                 } catch (RuntimeException $e) {
                     $this->app->enqueueMessage(
                         $e->getMessage(),
