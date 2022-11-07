@@ -146,7 +146,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                         'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_ID_TO_CHANGE_MANUALY_EXISTS',
                         $userIdToChangeManualy
                     ),
-                    'info'
+                    'error'
                 );
 
                 return;
@@ -176,7 +176,6 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      */
     private function changeUserIdIfUserDoesNotExistAnymore($extension, $item)
     {
-        $this->_subject->setError(new RuntimeException('Testmessage'));
         $fallbackUserId    = $this->params->get('fallbackUser');
         $fallbackAliasName = $this->params->get('fallbackAliasName', '');
 
