@@ -15,30 +15,43 @@ defined('_JEXEC') or die;
 use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 
 /**
- * Description.
+ * Class to support the core extension 'com_tags'.
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
 class Tags implements JtChUserBeforeDelInterface
 {
     /**
-     * Description.
+     * The extensions real name language string.
      *
      * @return  string
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    public function getExtensionName()
+    public function getExtensionRealNameLanguageString()
+    {
+        return $this->getExtensionBaseContext();
+    }
+
+    /**
+     * The extensions first/base part of the context.
+     *
+     * @return  string
+     *
+     * @since   1.0.0
+     */
+    public function getExtensionBaseContext()
     {
         return 'com_tags';
     }
 
     /**
-     * Description.
+     * The database table and columns about the user information to change.
      *
      * @return  array
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
+     * @see     JtChUserBeforeDelInterface
      */
     public function getColumsToChange()
     {

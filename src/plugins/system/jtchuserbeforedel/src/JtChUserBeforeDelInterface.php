@@ -15,21 +15,30 @@ defined('_JEXEC') or die;
 /**
  * Description.
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
 interface JtChUserBeforeDelInterface
 {
     /**
-     * Get the extension name like the first part of the context.
+     * The extensions real name language string.
      *
      * @return  string
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    public function getExtensionName();
+    public function getExtensionRealNameLanguageString();
 
     /**
-     * Get the database table and columns about the user information to change.
+     * The extensions first/base part of the context.
+     *
+     * @return  string
+     *
+     * @since   1.0.0
+     */
+    public function getExtensionBaseContext();
+
+    /**
+     * The database table and columns about the user information to change.
      *
      * Expected array keys, if there is a table and column to change:
      * Example:
@@ -38,12 +47,11 @@ interface JtChUserBeforeDelInterface
      *      'uniqueId'  => 'id',
      *      'author'    => 'created_by',
      *      'alias'     => 'created_by_alias',
-     *      'editor'    => 'modified_by',
      * )
      *
      * @return  array
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     public function getColumsToChange();
 }

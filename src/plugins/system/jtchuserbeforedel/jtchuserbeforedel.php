@@ -26,15 +26,15 @@ use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 /**
  * Class to replace the userid on component items on user deletion
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
 class PlgSystemJtchuserbeforedel extends CMSPlugin
 {
     /**
-     * Global application object
+     * Global database object
      *
      * @var    \JDatabaseDriver
-     * @since  __BUMP_VERSION__
+     * @since  1.0.0
      */
     protected $db = null;
 
@@ -42,7 +42,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      * Global application object
      *
      * @var     CMSApplication
-     * @since  __BUMP_VERSION__
+     * @since  1.0.0
      */
     protected $app = null;
 
@@ -50,79 +50,53 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
      * Load the language file on instantiation.
      *
      * @var     boolean
-     * @since  __BUMP_VERSION__
+     * @since  1.0.0
      */
     protected $autoloadLanguage = true;
 
     /**
-     * Description
+     * Array of extensions class
      *
      * @var    array
-     * @since  __BUMP_VERSION__
+     * @since  1.0.0
      */
     private static $extensions = array();
 
     /**
-     * Description
+     * Event triggered before an extension item output is rendered.
      *
      * @param   string  $context
      * @param   object  $item
      *
      * @return  void
      *
-     * @since   __BUMP_VERSION__
-     */
-    public function onContentBeforeSave($context, $item)
-    {
-        // TODO: Check if needed, as 'onContentPrepareData' clears all on load!
-        list($extensionName, $rest) = explode('.', $context, 2);
-
-        $extension = $this->getExtension($extensionName);
-
-        if ($extension instanceof JtChUserBeforeDelInterface) {
-            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
-        }
-    }
-
-    /**
-     * Description
-     *
-     * @param   string  $context
-     * @param   object  $item
-     *
-     * @return  void
-     *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     public function onContentPrepareData($context, $item)
     {
-        list($extensionName, $rest) = explode('.', $context, 2);
+        $extensionClass = $this->getExtensionClass($context);
 
-        $extension = $this->getExtension($extensionName);
-
-        if ($extension instanceof JtChUserBeforeDelInterface) {
-            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
+        if ($extensionClass instanceof JtChUserBeforeDelInterface) {
+            $this->changeUserIdIfUserDoesNotExistAnymore($extensionClass, $item);
         }
     }
 
     /**
-     * Description
+     * Event triggered before an extension is saved.
      *
      * @param   string  $context
      * @param   object  $item
      *
      * @return  void
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     public function onExtensionBeforeSave($context, $item)
     {
-        list($extensionName, $rest) = explode('.', $context, 2);
+        $extensionClass = $this->getExtensionClass($context);
 
-        $extension = $this->getExtension($extensionName);
-
-        if ($extension instanceof JtChUserBeforeDelInterface) {
-            $this->changeUserIdIfUserDoesNotExistAnymore($extension, $item);
+        if ($extensionClass instanceof JtChUserBeforeDelInterface) {
+            $this->changeUserIdIfUserDoesNotExistAnymore($extensionClass, $item);
         }
 
         if ($context == 'com_plugins.plugin' && $item->name == 'plg_system_jtchuserbeforedel') {
@@ -165,16 +139,16 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Changes the user in all registered extensions if it no longer exists.
      *
-     * @param   object  $extension
+     * @param   object  $extensionClass
      * @param   object  $item
      *
      * @return  void
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    private function changeUserIdIfUserDoesNotExistAnymore($extension, $item)
+    private function changeUserIdIfUserDoesNotExistAnymore($extensionClass, $item)
     {
         $fallbackUserId    = $this->params->get('fallbackUser');
         $fallbackAliasName = $this->params->get('fallbackAliasName', '');
@@ -183,7 +157,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $fallbackUserId = Factory::getUser()->id;
         }
 
-        foreach ($extension->getColumsToChange() as $table) {
+        foreach ($extensionClass->getColumsToChange() as $table) {
             if (is_array($table) && count($table) > 1) {
                 $authorExists = true;
                 $authorTable  = $table['author'] ?? false;
@@ -196,7 +170,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                 if (!$authorExists) {
                     $this->app->enqueueMessage(
                         Text::sprintf(
-                            'PLG_SYSTEM_JTCHUSERBEFOREDEL_AUTHOR_CHANGED_MSG',
+                            'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_CHANGED_MSG',
                             $item->$authorTable,
                             $fallbackUserId
                         ),
@@ -228,13 +202,13 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Checks if a user exists.
      *
      * @param   int  $userId
      *
      * @return  bool
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     private function isUserExists($userId)
     {
@@ -244,13 +218,13 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Event triggered before the user is deleted.
      *
      * @param   array  $user
      *
      * @return  void
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     public function onUserBeforeDelete($user)
     {
@@ -258,7 +232,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
         if ($user['id'] == $fallbackUser) {
             $this->app->enqueueMessage(
-                'Der Benutzer wurde als Fallback eingestellt und kann deshalb nicht gelöscht werden,<br /> bitte vorher ändern!',
+                Text::_('PLG_SYSTEM_JTCHUSERBEFOREDEL_ERROR_FALLBACK_USER_CONNECTED_MSG'),
                 'error'
             );
 
@@ -268,7 +242,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
         if (!$this->changeUser($user)) {
             $this->app->enqueueMessage(
-                'Der Benutzer wurde nicht gelöscht!',
+                Text::_('PLG_SYSTEM_JTCHUSERBEFOREDEL_ERROR_USER_NOT_DELETED_MSG'),
                 'error'
             );
 
@@ -278,13 +252,13 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Changes the user in all registered extensions before deleting them.
      *
      * @param   array  $user
      *
-     * @return  void
+     * @return  bool
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     private function changeUser($user)
     {
@@ -298,12 +272,12 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $fallbackUserId = Factory::getUser()->id;
         }
 
-        if (empty($extensions = $this->getExtension())) {
+        if (empty($extensions = $this->getExtensionClass())) {
             // TODO: Add error handling and/or message and return false
             return true;
         }
 
-        foreach ($extensions as $extensionName => $extensionClass) {
+        foreach ($extensions as $extensionBaseContext => $extensionClass) {
             /** @var JtChUserBeforeDelInterface $extensionClass */
             $columsToChangeUserId = $extensionClass->getColumsToChange();
 
@@ -318,7 +292,9 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
                     $selectQuery->select($this->db->quoteName($uniqueId))
                         ->from($tableName)
-                        ->where($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId))
+                        ->where(
+                            $this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId)
+                        )
                         ->set('FOR UPDATE');
 
                     $updateQuery = $this->db->getQuery(true);
@@ -328,7 +304,9 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
 
                     if ($setAuthorAlias && $aliasColumn) {
                         if ($this->params->get('overrideAlias')) {
-                            $updateQuery->set($this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($aliasName));
+                            $updateQuery->set(
+                                $this->db->quoteName($aliasColumn) . ' = ' . $this->db->quote($aliasName)
+                            );
                         } else {
                             $updateQuery->set(
                                 $this->db->quoteName($aliasColumn)
@@ -340,10 +318,10 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                         }
                     }
 
-                    $updateQuery->where($this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId));
+                    $updateQuery->where(
+                        $this->db->quoteName($authorColumn) . ' = ' . $this->db->quote((int) $userId)
+                    );
                 }
-
-                $test = (string) $updateQuery;
 
                 try {
                     $infoAuthorAlias = '';
@@ -353,16 +331,21 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                         $elementList = implode(', ', $selectResult);
 
                         if ($setAuthorAlias && $aliasColumn) {
-                            $infoAuthorAlias = sprintf('Es wurde jeweils der Autoralias "%s" eingetragen.', $aliasName);
+                            $infoAuthorAlias = sprintf(
+                                'Es wurde jeweils der Autoralias "%s" eingetragen.',
+                                $aliasName
+                            );
                         }
 
-                        Factory::getLanguage()->load($extensionName);
+                        // Load extension language files
+                        $this->app->getLanguage()->load($extensionBaseContext);
+                        $this->app->getLanguage()->load($extensionBaseContext . '.sys');
 
                         $this->db->setQuery($updateQuery)->execute();
                         $this->app->enqueueMessage(
                             Text::sprintf(
-                                '%s: bei den Elementen mit der ID "%s" wurde die alte Benutzer ID "%d" mit der ID "%d" ausgetauscht. %s',
-                                Text::_($extensionName),
+                                'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_DELETED_MSG',
+                                Text::_($extensionClass->getExtensionRealNameLanguageString()),
                                 $elementList,
                                 (int) $userId,
                                 (int) $fallbackUserId,
@@ -386,46 +369,75 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Initialize the extensions class array.
      *
      * @return  void
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     private function initExtensions()
     {
+        \JLoader::registerNamespace(
+            'JtChUserBeforeDel\\Extension',
+            JPATH_PLUGINS . '/system/jtchuserbeforedel/src/Extension/all',
+            false,
+            true,
+            'psr4'
+        );
+
+        if (version_compare(JVERSION, '4', 'ge')) {
+            \JLoader::registerNamespace(
+                'JtChUserBeforeDel\\Extension',
+                JPATH_PLUGINS . '/system/jtchuserbeforedel/src/Extension/onlyJoomla4',
+                false,
+                true,
+                'psr4'
+            );
+        }
+
+        if (version_compare(JVERSION, '4', 'lt')) {
+            \JLoader::registerNamespace(
+                'JtChUserBeforeDel\\Extension',
+                JPATH_PLUGINS . '/system/jtchuserbeforedel/src/Extension/onlyJoomla3',
+                false,
+                true,
+                'psr4'
+            );
+        }
+
         $ns      = \JLoader::getNamespaces('psr4');
-        $nsPaths = (array) $ns['JtChUserBeforeDel'];
+        $nsPaths = (array) $ns['JtChUserBeforeDel\\Extension'];
 
         foreach ($nsPaths as $nsPath) {
-            $extensions = Folder::files($nsPath . '/Extension');
+            $extensions = Folder::files($nsPath);
 
-            foreach ($extensions as $extension) {
-                /** @var JtChUserBeforeDelInterface $extension */
-                $extension = $this->getExtensionClass($extension);
+            foreach ($extensions as $extensionFileName) {
+                /** @var JtChUserBeforeDelInterface $extensionClass */
+                $extensionClass = $this->loadExtensionClass($extensionFileName);
 
-                if ($extension instanceof JtChUserBeforeDelInterface) {
-                    self::$extensions[$extension->getExtensionName()] = $extension;
+                if ($extensionClass instanceof JtChUserBeforeDelInterface
+                    && !isset(self::$extensions[$extensionClass->getExtensionBaseContext()])
+                ) {
+                    self::$extensions[$extensionClass->getExtensionBaseContext()] = $extensionClass;
                 }
             }
         }
     }
 
     /**
-     * Description
+     * Load the extension class.
      *
-     * @param   string  $extensionPath
+     * @param   string  $extensionFileName
      *
      * @return  JtChUserBeforeDelInterface|null
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    private function getExtensionClass($extensionPath)
+    private function loadExtensionClass($extensionFileName)
     {
-        $error         = false;
-        $extensionName = File::stripExt($extensionPath);
-
-        $extensionNs = 'JtChUserBeforeDel\\Extension\\' . ucfirst($extensionName);
+        $error              = false;
+        $extensionClassName = File::stripExt($extensionFileName);
+        $extensionNs        = 'JtChUserBeforeDel\\Extension\\' . ucfirst($extensionClassName);
 
         try {
             $extensionClass = new $extensionNs;
@@ -436,9 +448,14 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
         }
 
         if ($error) {
-            // TODO: Change Message to Languagefile.
             $this->app->enqueueMessage(
-                sprintf("The class '%s' to call for handle the download could not be found.", $extensionNs),
+                Text::sprintf(
+                    'PLG_SYSTEM_JTCHUSERBEFOREDEL_ERROR_LOADING_CLASS_MSG',
+                    Text::_('PLG_SYSTEM_JTCHUSERBEFOREDEL'),
+                    $extensionNs,
+                    $e->getFile(),
+                    $e->getLine()
+                ),
                 'error'
             );
 
@@ -449,24 +466,26 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     }
 
     /**
-     * Description
+     * Get the extension class by the context.
      *
-     * @param   string  $extName
+     * @param   string  $context
      *
      * @return  JtChUserBeforeDelInterface|array
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    private function getExtension($extName = null)
+    private function getExtensionClass($context = null)
     {
         if (empty(self::$extensions)) {
             $this->initExtensions();
         }
 
-        if (is_null($extName)) {
+        if (is_null($context)) {
             return self::$extensions;
         }
 
-        return self::$extensions[$extName] ?? array();
+        list($extensionBaseContext, $rest) = explode('.', $context, 2);
+
+        return self::$extensions[$extensionBaseContext] ?? array();
     }
 }

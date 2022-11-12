@@ -15,43 +15,51 @@ defined('_JEXEC') or die;
 use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 
 /**
- * Description.
+ * Class to support the core extension 'com_categories'.
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
-class Fields implements JtChUserBeforeDelInterface
+class Categories implements JtChUserBeforeDelInterface
 {
     /**
-     * Description.
+     * The extensions real name language string.
      *
      * @return  string
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    public function getExtensionName()
+    public function getExtensionRealNameLanguageString()
     {
-        return 'com_fields';
+        return $this->getExtensionBaseContext();
     }
 
     /**
-     * Description.
+     * The extensions first/base part of the context.
+     *
+     * @return  string
+     *
+     * @since   1.0.0
+     */
+    public function getExtensionBaseContext()
+    {
+        return 'com_categories';
+    }
+
+    /**
+     * The database table and columns about the user information to change.
      *
      * @return  array
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
+     * @see     JtChUserBeforeDelInterface
      */
     public function getColumsToChange()
     {
         return array(
             array(
-                'tableName' => '#__fields',
+                'tableName' => '#__categories',
                 'uniqueId'  => 'id',
                 'author'    => 'created_user_id',
-            ),
-            array(
-                'tableName' => '#__fields_groups',
-                'uniqueId'  => 'id',
-                'author'    => 'created_by',
             ),
         );
     }

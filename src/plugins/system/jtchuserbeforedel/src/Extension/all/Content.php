@@ -15,36 +15,49 @@ defined('_JEXEC') or die;
 use JtChUserBeforeDel\JtChUserBeforeDelInterface;
 
 /**
- * Description.
+ * Class to support the core extension 'com_content'.
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
-class Banners implements JtChUserBeforeDelInterface
+class Content implements JtChUserBeforeDelInterface
 {
     /**
-     * Description.
+     * The extensions real name language string.
      *
      * @return  string
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
-    public function getExtensionName()
+    public function getExtensionRealNameLanguageString()
     {
-        return 'com_banners';
+        return $this->getExtensionBaseContext();
     }
 
     /**
-     * Description.
+     * The extensions first/base part of the context.
+     *
+     * @return  string
+     *
+     * @since   1.0.0
+     */
+    public function getExtensionBaseContext()
+    {
+        return 'com_content';
+    }
+
+    /**
+     * The database table and columns about the user information to change.
      *
      * @return  array
      *
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
+     * @see     JtChUserBeforeDelInterface
      */
     public function getColumsToChange()
     {
         return array(
             array(
-                'tableName' => '#__banners',
+                'tableName' => '#__content',
                 'uniqueId'  => 'id',
                 'author'    => 'created_by',
                 'alias'     => 'created_by_alias',

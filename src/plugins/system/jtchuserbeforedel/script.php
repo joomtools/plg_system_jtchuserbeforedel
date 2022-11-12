@@ -17,14 +17,14 @@ use Joomla\CMS\Language\Text;
 /**
  * Script file of Joomla CMS
  *
- * @since  __BUMP_VERSION__
+ * @since  1.0.0
  */
 class PlgSystemjJtchuserbeforedelInstallerScript
 {
     /**
      * Extension script constructor.
      *
-     * @since  __BUMP_VERSION__
+     * @since  1.0.0
      */
     public function __construct()
     {
@@ -40,7 +40,7 @@ class PlgSystemjJtchuserbeforedelInstallerScript
      * @param   Installer  $installer  The class calling this method
      *
      * @return  boolean  True on success
-     * @since   __BUMP_VERSION__
+     * @since   1.0.0
      */
     public function preflight($action, $installer)
     {
