@@ -331,8 +331,8 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
                         $elementList = implode(', ', $selectResult);
 
                         if ($setAuthorAlias && $aliasColumn) {
-                            $infoAuthorAlias = sprintf(
-                                'Es wurde jeweils der Autoralias "%s" eingetragen.',
+                            $infoAuthorAlias = Text::sprintf(
+                                'PLG_SYSTEM_JTCHUSERBEFOREDEL_USER_CHANGED_FALLBACK_ALIAS_MSG',
                                 $aliasName
                             );
                         }
