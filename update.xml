@@ -7,16 +7,16 @@
         <type>plugin</type>
         <folder>system</folder>
         <client>site</client>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/joomtools/plg_system_jtchuserbeforedel/releases/download/1.0.0/plg_system_jtchuserbeforedel-1.0.0.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/joomtools/plg_system_jtchuserbeforedel/releases/download/1.0.1/plg_system_jtchuserbeforedel-1.0.1.zip</downloadurl>
         </downloads>
         <tags>
             <tag>stable</tag>
         </tags>
-        <sha256>11ac9e1cb52d18324437efe9f8da66ab35b836b17c03c36ce3b9f58cb43bcae1</sha256>
-        <sha384>601dd607df3d7a221de8f1822154ed23b8c1a0c09f8ca37bb5e81e1b4fcb24f6535d71a5809d31c4252728977116702d</sha384>
-        <sha512>a792bebc6f2f81cc77654914101579aef5524efe3af651bfc398432a1d218419bfe0266a160e3fe7143cb104603c2caf234590b90f048634bf14537734206059</sha512>
+        <sha256>9826c536752783be60a62eda8f601fc973f5fbb0bba340d32ec2a6f5e775c584</sha256>
+        <sha384>1d470435e6dc26dbe96401dae998c6f905e363efc29c4c9bf8625257e83587bdd51dcd63548f05bf9c8042360317b15a</sha384>
+        <sha512>3fd04242416d6945cccc19c2c49d3a62ed08baab0c051ba042011ba98c3ed67dd539c114583069e07a3b2606bb5eb4228946b6b6184f7aa2c8eab0a89b868a92</sha512>
         <maintainer>Guido De Gobbis</maintainer>
         <targetplatform name="joomla" version="3.10"/>
         <php_minimum>7.4</php_minimum>
@@ -28,16 +28,16 @@
         <type>plugin</type>
         <folder>system</folder>
         <client>site</client>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/joomtools/plg_system_jtchuserbeforedel/releases/download/1.0.0/plg_system_jtchuserbeforedel-1.0.0.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/joomtools/plg_system_jtchuserbeforedel/releases/download/1.0.1/plg_system_jtchuserbeforedel-1.0.1.zip</downloadurl>
         </downloads>
         <tags>
             <tag>stable</tag>
         </tags>
-        <sha256>11ac9e1cb52d18324437efe9f8da66ab35b836b17c03c36ce3b9f58cb43bcae1</sha256>
-        <sha384>601dd607df3d7a221de8f1822154ed23b8c1a0c09f8ca37bb5e81e1b4fcb24f6535d71a5809d31c4252728977116702d</sha384>
-        <sha512>a792bebc6f2f81cc77654914101579aef5524efe3af651bfc398432a1d218419bfe0266a160e3fe7143cb104603c2caf234590b90f048634bf14537734206059</sha512>
+        <sha256>9826c536752783be60a62eda8f601fc973f5fbb0bba340d32ec2a6f5e775c584</sha256>
+        <sha384>1d470435e6dc26dbe96401dae998c6f905e363efc29c4c9bf8625257e83587bdd51dcd63548f05bf9c8042360317b15a</sha384>
+        <sha512>3fd04242416d6945cccc19c2c49d3a62ed08baab0c051ba042011ba98c3ed67dd539c114583069e07a3b2606bb5eb4228946b6b6184f7aa2c8eab0a89b868a92</sha512>
         <maintainer>Guido De Gobbis</maintainer>
         <targetplatform name="joomla" version="4.[1234567890]"/>
         <php_minimum>7.4</php_minimum>
