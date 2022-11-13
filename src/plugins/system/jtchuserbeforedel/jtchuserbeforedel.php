@@ -412,6 +412,12 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
             $extensions = Folder::files($nsPath);
 
             foreach ($extensions as $extensionFileName) {
+                $ext = pathinfo($extensionFileName, PATHINFO_EXTENSION);
+
+                if ($ext != 'php') {
+                    continue;
+                }
+
                 /** @var JtChUserBeforeDelInterface $extensionClass */
                 $extensionClass = $this->loadExtensionClass($extensionFileName);
 
@@ -436,7 +442,7 @@ class PlgSystemJtchuserbeforedel extends CMSPlugin
     private function loadExtensionClass($extensionFileName)
     {
         $error              = false;
-        $extensionClassName = File::stripExt($extensionFileName);
+        $extensionClassName = pathinfo($extensionFileName, PATHINFO_FILENAME);
         $extensionNs        = 'JtChUserBeforeDel\\Extension\\' . ucfirst($extensionClassName);
 
         try {
